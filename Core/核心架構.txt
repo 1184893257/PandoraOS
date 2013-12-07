@@ -1,0 +1,37 @@
+0-1MB處為內核使用的內存範圍。
+	00000-003FF	IVR，中斷向量錶
+	00400-005FF	BIOS數據區
+	00600-9FFFF	自由使用（07C00-07E00：引導扇區）
+	A0000-AFFFF	圖形顯存
+	B0000-B7FFF	單色文本顯存
+	B8000-BFFFF	彩色文本顯存
+	C0000-CFFFF	顯卡ROM-BIOS區（C0000=0xAA55）
+	D0000-FFFFF	主板ROM-BIOS區（D0000=0xAA55，E0000=0xAA55）
+0-16MB處為DMA緩衝區。
+16MB-20MB為內存管理數據（劉喬羽的內存管理模型）
+
+1、引導部份
+引導方式：
+	1)BIOS自檢后讀取硬盤MBR扇區到物理地址0x7C00執行。
+	2)MBR自動查找可用的DBR，載入到物理地址0x7C00執行。
+	3)DBR查找硬盤根目錄Loader.sys，載入到0x7C00執行。
+	4)Loader.sys完成一些必要的初始化，設置好臨時GDT，把Core.sys載入到內核開始處，再進入保護模式的同時跳轉至Core執行。
+	5)Core.sys即內核。
+
+注意事項：
+	Loader.sys、Core.sys都是平坦二進制文件。
+	我們不需要編寫MBR。MBR就使用通用MBR即可。
+	DBR只負責從文件系統載入Loader.sys到0x7C00然後跳轉至信，並不需要它去做更多的工作。
+	Loader.sys負責以下事項：
+		初始化16位子系統
+		載入驅動
+		對各部份硬件進行必要的初始化
+		載入Core.sys
+		構建保護模式運行環境
+		切換進保護模式
+		藉助進入保護模式的機會跳轉至Core.sys的位置
+	Core.sys的開頭部份是用彙編編寫的，剩下部份是C（注：不是C++）。Loader.sys和DBR部份是純彙編。
+	Loader.sys，必要的話可以使用Turbo C編寫C的部份（不推薦）
+
+2、內核部份
+	請你們來補充
