@@ -3,6 +3,9 @@ PandoraOS（潘多拉操作系统）
 
 [我们的论坛](http://www.0xaa55bbs.com)
 
+潘多拉操作系统是一款基于x86架构的PC操作系统。
+Pandora OS is an operation system based on x86.
+
 内核的代码和说明都在Core文件夹里面。
 无视SETENV.BAT。这个批命令用于设置编译的环境变量。
 Core\INCLUDE文件夹是包含的头文件，INC后缀的是汇编NASM的包含文件，有一些定义。
