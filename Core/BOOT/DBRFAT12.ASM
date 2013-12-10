@@ -42,7 +42,8 @@ FindLoader:
 	jc FoundFile				;找到就跳转
 	
 	inc bp						;没找到则继续读取下一个扇区
-	loop FindLoader				;循环寻找
+	cmp bp,[g_wDataStartLBA]
+	jb FindLoader				;循环寻找
 	jmp LoadFailed				;读完所有根目录区都没有找到则认定引导失败。
 	
 FoundFile:						;找到了文件
