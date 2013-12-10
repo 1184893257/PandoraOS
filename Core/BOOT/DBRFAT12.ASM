@@ -24,25 +24,12 @@ DBR_Continue:					;此处从DBR_Continue开始
 	mov bx,FLOPPY_FAT_BUFFER	;读取到FLOPPY_FAT_BUFFER处
 	mov bp,[BPB.wReservedSecs]	;定位开始扇区
 .ReadAllFATItems:
-	mov ax,bp					;设置LBA
+	mov ax,bp					;设置ax=LBA，以调用ReadSector
 	call ReadSector
 	inc bp						;设置LBA
-	add bx,[BPB.wBytesPerSec]	;设置缓冲区指針指针
+	add bx,[BPB.wBytesPerSec]	;设置缓冲区指针
 	dec di						;计数减1（不用cx是因为ReadSector破坏cx）
 	jnz .ReadAllFATItems
-
-GetDataStartLBA:				;计算数据区的开始位置
-	add bp,[BPB.wSecsPerFAT]	;bp指向根目录区起始位置
-	mov ax,SIZE_DIRENTRY		;计算根目录区总大小
-	mov cx,[BPB.wMaxRootItems]	;设置CX为最大根目录数为找引导文件做准备
-	mul cx						;根目录最大个数乘每个目录项大小
-	div word[BPB.wBytesPerSec]	;再除以每扇区字节数，为根目录区占用扇区数
-	or dx,dx					;判断除法余数是否不为零
-	jz .NoTail					;不是的话继续
-	inc ax						;是的话判断根目录区要多占一个扇区
-.NoTail:
-	add ax,bp					;加上根目录区的开始位置
-	mov [g_wDataStartLBA],ax	;就是数据区的开始位置了
 	
 FindLoader:
 	mov ax,bp					;读取根目录区
@@ -60,19 +47,18 @@ FindLoader:
 	
 FoundFile:						;找到了文件
 	mov bp,[si+FAT_DIRITEM.wFirstClusLO];读取文件首簇（FAT12的簇号只有12位）
-	cmp bp,FAT12_MAXVALIDCLUS	;簇号是否大于最大合法簇号
-	ja LoadFailed				;是，失败退出
-	cmp bp,FAT12_MINVALIDCLUS	;簇号是否低于最小合法簇号
-	jb LoadFailed				;是，失败退出
+	cmp bp,FAT12_MAXVALIDCLUS	;判断簇号是否合法
+	ja LoadFailed
+	cmp bp,FAT12_MINVALIDCLUS
+	jb LoadFailed
 	mov bx,LODR_ORG				;读取目标为LOADER.SYS的起始位置
 ReadClusterChainToLoadLoader:	;开始读取簇链
 	mov ax,bp					;设置簇号
-	call ReadCluster			;读取簇
-	
-	movzx cx,byte[BPB.bSecsPerCluster];准备移动缓冲区指针
-.LoopAddOffs:
+	dec ax
+	dec ax
+	add ax,[g_wDataStartLBA]
+	call ReadSector				;读取簇
 	add bx,[BPB.wBytesPerSec]	;移动缓冲区指针
-	loop .LoopAddOffs			;按照每簇扇区数移动
 	
 	mov si,bp					;读取下一个簇链
 	shr si,1
@@ -83,10 +69,10 @@ ReadClusterChainToLoadLoader:	;开始读取簇链
 	shr ax,4
 .FAT12Low:
 	and ax,0xFFF				;已取得簇号->ax
-	cmp ax,FAT12_MAXVALIDCLUS	;簇号是否大于最大合法簇号
-	ja LoadOK					;是，载入完成
-	cmp ax,FAT12_MINVALIDCLUS	;簇号是否低于最小合法簇号
-	jb LoadFailed				;是，失败退出
+	cmp ax,FAT12_MAXVALIDCLUS	;判断簇号是否合法
+	ja LoadOK
+	cmp ax,FAT12_MINVALIDCLUS
+	jb LoadFailed
 	mov bp,ax					;设置簇链的簇号为下一个要读取的簇
 	jmp ReadClusterChainToLoadLoader;继续载入簇链
 	
@@ -168,31 +154,6 @@ ReadSector:
 .ReadErrLen		equ	$-.ReadErr
 .ReadOK:						;读取OK：
 	ret
-
-
-;读取簇的函数
-	;ax=簇号
-	;bx=缓冲区
-;返回：
-	;si=剩余重试次数
-	;ax=int 0x13结果
-	;cx=0
-	;dx=磁头:驱动器
-ReadCluster:
-	movzx cx,byte[BPB.bSecsPerCluster]
-	sub ax,2					;簇号減去2
-	mul cx						;再乘每簇扇区数
-	add ax,[g_wDataStartLBA]	;再加上数据区的起始扇区
-.ReadNextSec:					;为保险起见，按照每簇扇区数读取簇
-	push cx
-	push ax
-	call ReadSector
-	pop ax
-	pop cx
-	inc ax
-	add bx,[BPB.wBytesPerSec]
-	loop .ReadNextSec
-	ret
 	
 ;提示出错然后当机的函数
 	;si=错误提示文本
@@ -213,9 +174,9 @@ g_strLoaderFileName	db LODR_FILENAME
 g_wDataStartLBA		dw (FLOPPY_RESV_SECS+FLOPPY_FAT_COUNT*FLOPPY_FAT_SECS+FLOPPY_ROOT_ITEMS*SIZE_DIRENTRY/FLOPPY_SEC_LEN)
 
 %xdefine DBR_FILL_SIZE (DBR_SIZE-($-$$)-2)
-times (DBR_FILL_SIZE>>1) db 0xFA,0xF4
+times (DBR_FILL_SIZE>>1) db 0xFA,0xF4;用cli,hlt来填充剩余的字节
 %if DBR_FILL_SIZE&1
-hlt
+hlt;最后如果还有一个字节没有填充则填充它
 %endif
 %undef DBR_FILL_SIZE
 dw	FLAG_BOOTALBE
