@@ -5,6 +5,6 @@
 void main()
 {
 	SwitchToTextMode();
-	Print(OSNAME" is loading.\n");
+	Print(OSNAME" is loading.\r\n");
 	for(;;);
 }

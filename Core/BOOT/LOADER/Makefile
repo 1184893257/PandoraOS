@@ -7,7 +7,7 @@ OUT\LOADER.SYS: $(LINKLIST)
 	..\..\Tools\OUT\exe2bin -o0:7c00 OUT\LOADER.EXE OUT\LOADER.RAW
 	del OUT\LOADER.EXE
 	nasm final.asm -o OUT\LOADER.SYS
-	del oUT\LOADER.RAW
+	del OUT\LOADER.RAW
 
 %.OBJ: %.C
 	TCC -C -G -O -c $<
