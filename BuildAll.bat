@@ -1,18 +1,16 @@
-@echo off
-echo 本批命令将完成整个工程所有文件的编译，如不需要编译请关掉此窗口。
-pause
+echo q|debug>nul
 
-echo 编译Tools
+echo compiling Tools...
 cd Core\Tools
-call build.bat
+mingw32-make
 
-echo 编译DBR引导扇区代码
+echo compiling DBR...
 cd ..\BOOT
-call build.bat
+mingw32-make
 
-echo 编译LOADER.SYS
+echo compiling LOADER.SYS...
 cd LOADER
-call build.bat
+mingw32-make
 
-echo 全部编译完成，请检查是否有错误产生。
+echo compile finished.
 pause

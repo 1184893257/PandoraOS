@@ -1,0 +1,7 @@
+all: OUT\EXE2BIN.EXE
+
+OUT\EXE2BIN.EXE: EXE2BIN\Entry.c
+	gcc -O2 EXE2BIN\Entry.c -o OUT\EXE2BIN.EXE
+
+clean:
+	del OUT\*.EXE
