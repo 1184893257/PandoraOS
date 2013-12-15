@@ -1,7 +1,7 @@
 %ifndef __FAT_INFORMATION_INCLUDED__
 %define	__FAT_INFORMATION_INCLUDED__
 
-%define	OEM_NAME			"炫酷屌炸"		;OEM名字必须为8字节
+%define	OEM_NAME			"Pandora "		;OEM名字必须为8字节
 
 %define	MEDIA_FDD			0xF0			;介质类型：软盘
 %define	MEDIA_HDD			0xF8			;介质类型：硬盘

@@ -25,12 +25,14 @@ endproc
 proc	_SwitchToTextMode
 	push word 3				;压入参数3
 	call _SwitchVideoMode	;切换显示模式
-endproc	2					;弹出参数恢复堆栈平衡
+	add sp,2				;恢复堆栈平衡
+endproc
 
 proc	_SwitchTo320x200
 	push word 0x13			;压入参数0x13
 	call _SwitchVideoMode	;切换显示模式
-endproc	2					;弹出参数恢复堆栈平衡
+	add sp,2				;恢复堆栈平衡
+endproc
 
 proc	_Print			;打印字符串的函数
 	push si				;保存si，因为TC使用si、di用作变量寄存器
