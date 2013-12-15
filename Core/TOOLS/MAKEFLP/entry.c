@@ -41,13 +41,13 @@ typedef	struct				//FAT目录项结构体
 typedef	struct						//FAT的长文件名目录项结构体
 {
 	BYTE	bOrder;					//长文件名顺序
-	WCHAR	wNamePart1[5]			//5个字符的长文件名的一部份
+	WCHAR	wNamePart1[5];			//5个字符的长文件名的一部份
 	BYTE	bAttribute;				//属性，必须为ATTR_LONGNAME
 	BYTE	bType;					//类型，为0则表示这是长文件名的一部份，其他值保留为将来扩展时用。
 	BYTE	bChksum;				//校验和
 	WCHAR	wNamePart2[6];			//6个字符的长文件名的一部份
 	WORD	wFirstClusLO;			//必须为0
-	WCHAR	wNamePart3[2]			//2个字符的长文件名的一部份
+	WCHAR	wNamePart3[2];			//2个字符的长文件名的一部份
 }FAT_LONGNAME;
 
 BYTE	g_bFAT12[SECS_PER_FAT*BYTES_PER_SEC]={0};
@@ -56,13 +56,6 @@ FAT12表：
 字节：0 1 2 3 4 5 6 7 8
 索引： 0 1   2 3   4 5
 */
-
-void	NewFAT12()
-{
-	memset(g_bFAT12,0,sizeof(g_bFAT12));
-	WriteFAT12Item(0,MEDIA_FDD);
-	WriteFAT12Item(1,0xFFF);
-}
 
 WORD	ReadFAT12Item(WORD wIndex)
 {
@@ -92,6 +85,13 @@ void	WriteFAT12Item(WORD wIndex,WORD wValue)
 		wRead=(wRead&0xF000)|(wValue&0xFFF);
 }
 
+
+void	NewFAT12()
+{
+	memset(g_bFAT12,0,sizeof(g_bFAT12));
+	WriteFAT12Item(0,MEDIA_FDD);
+	WriteFAT12Item(1,0xFFF);
+}
 
 
 

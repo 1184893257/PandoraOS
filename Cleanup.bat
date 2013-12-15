@@ -1,5 +1,7 @@
 @echo off
 echo q|debug>nul
+call Core\SETENV.BAT
+set path=%MINGW%;%OLDPATH%
 
 echo cleaning Tools...
 cd Core\Tools
