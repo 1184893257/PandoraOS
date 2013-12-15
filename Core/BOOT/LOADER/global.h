@@ -3,7 +3,7 @@
 
 #define	OSNAME		"PandoraOS"
 
-#define	STACKSIZE	0xFFFF
+#define	STACKSIZE	0xFFFE
 
 typedef	unsigned	char	BYTE;
 typedef	unsigned	short	WORD;
@@ -23,7 +23,7 @@ typedef	char	bool;
 #define	false	0
 #endif
 
-typedef	INT8	BOOL;
+typedef	INT		BOOL;
 #define	TRUE	1
 #define	FALSE	0
 

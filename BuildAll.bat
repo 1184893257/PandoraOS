@@ -1,16 +1,15 @@
-echo q|debug>nul
+@echo q|debug >nul
 
-echo compiling Tools...
-cd Core\Tools
-mingw32-make
+@cd Core\TOOLS
+@call BUILD.BAT
+@cd ..
 
-echo compiling DBR...
-cd ..\BOOT
-mingw32-make
+@cd BOOT
+@call BUILD.BAT
 
-echo compiling LOADER.SYS...
-cd LOADER
-mingw32-make
+@cd LOADER
+@call BUILD.BAT
+@cd ..\..
 
-echo compile finished.
-pause
+@echo compile finished.
+@pause

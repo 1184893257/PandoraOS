@@ -1,20 +1,22 @@
-LINKLIST = entry.obj video.obj C_ENTRY.OBJ
+LINKLIST = OUT\ENTRY.AO OUT\VIDEO.AO OUT\C_ENTRY.OBJ
 
 all: OUT\LOADER.SYS
 
 OUT\LOADER.SYS: $(LINKLIST)
 	TLINK /x /n /3 /c $(LINKLIST), OUT\LOADER.EXE
-	..\..\Tools\OUT\exe2bin -o0:7c00 OUT\LOADER.EXE OUT\LOADER.RAW
-	del OUT\LOADER.EXE
+	exe2bin -o0:7c00 OUT\LOADER.EXE OUT\LOADER.RAW >nul
 	nasm final.asm -o OUT\LOADER.SYS
-	del OUT\LOADER.RAW
 
-%.OBJ: %.C
-	TCC -C -G -O -c $<
+OUT\C_ENTRY.OBJ: C_ENTRY.C
+	TCC -C -G -O -c -nOUT C_ENTRY.C
 
-%.obj: %.asm
-	nasm -f obj $< -o $*.obj
+OUT\ENTRY.AO: ENTRY.ASM
+	nasm -f obj ENTRY.ASM -o OUT\ENTRY.AO
+
+OUT\VIDEO.AO: VIDEO.ASM
+	nasm -f obj VIDEO.ASM -o OUT\VIDEO.AO
 
 clean:
-	del OUT\LOADER.SYS
-	del *.obj
+	del /F    OUT\LOADER.SYS
+	del /F /Q OUT\*.AO 2>nul
+	del /F /Q OUT\*.OBJ 2>nul

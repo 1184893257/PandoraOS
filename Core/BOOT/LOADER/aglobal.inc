@@ -9,7 +9,7 @@
 %ifndef	_ASSEMBLY_COMMON_HEADER_
 %define	_ASSEMBLY_COMMON_HEADER_
 
-%define	STACKSIZE	0xFFFF
+%define	STACKSIZE	0xFFFE
 %define	MODEL_NEAR
 
 segment	_TEXT			class=CODE
