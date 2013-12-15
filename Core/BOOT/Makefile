@@ -10,4 +10,4 @@ OUT/DBRFAT32.BIN: DBRFAT32.ASM
 	nasm DBRFAT32.ASM -o OUT/DBRFAT32.BIN
 
 clean:
-	del out/*.BIN
+	del out\*.BIN
