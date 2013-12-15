@@ -16,18 +16,19 @@ global	_ShowHex
 
 segment	_TEXT
 proc	_SwitchVideoMode
+	mov ax,[arg(0)]
 	int 0x10
 endproc
 
 proc	_SwitchToTextMode
-	mov ax, 3
+	push word 3
 	call _SwitchVideoMode
-endproc
+endproc	2
 
 proc	_SwitchTo320x200
-	mov ax, 0x13
+	push word 0x13
 	call _SwitchVideoMode
-endproc
+endproc	2
 
 proc	_Print
 	push si
