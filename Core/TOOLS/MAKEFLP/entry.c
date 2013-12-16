@@ -6,9 +6,10 @@
 //
 //*****************************************************************************
 #include<stdio.h>
+#include<string.h>
 #include"fat12img.h"
 
-void PrintUsage()
+void PrintUsage(void)
 {
 	printf(
 		"Usage:\n"
@@ -24,6 +25,7 @@ int main(int argc,char** argv)
 		PrintUsage();
 		return -1;
 	}
+
 	fpout=fopen(argv[1],"wb");
 	if(!fpout)
 	{

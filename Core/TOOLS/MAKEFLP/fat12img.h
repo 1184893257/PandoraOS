@@ -23,6 +23,8 @@ typedef	int		BOOL;
 #define	TRUE	1
 #define	FALSE	0
 
+#pragma pack(push,1)
+
 #define	FLOPPY_SECS_PER_FAT		9
 #define	FLOPPY_BYTES_PER_SEC	0x200
 #define	FLOPPY_MAX_ROOT			0xE0
@@ -37,6 +39,7 @@ typedef	int		BOOL;
 #define	FLOPPY_CLUS_MAX			0xFEF
 #define	FLOPPY_CLUS_MIN			2
 #define	FLOPPY_CLUS_END			0xFFF
+#define	FLOPPY_VALID_CLUS(c)	((c)>=FLOPPY_CLUS_MIN&&(c)<=FLOPPY_CLUS_MAX)
 #define	MEDIA_FDD				0xF0
 
 //文件目录项的值
@@ -72,24 +75,27 @@ typedef	struct				//FAT目录项结构体
 	DWORD	dwFileSize;		//文件大小
 }FAT_DIRITEM;
 
+//不合法的文件名字符：\ / * ? " < > |
 #define	VALIDCHR(c)			((c)!= '\\'&&(c)!= '/'&&(c)!= '*'&&(c)!= '?'&&(c)!= '\"'&&(c)!= '<'&&(c)!= '>'&&(c)!= '|'&&(c)>0x20&&(c)<0x80)
 #define	VALIDWCHR(c)		((c)!=L'\\'&&(c)!=L'/'&&(c)!=L'*'&&(c)!=L'?'&&(c)!=L'\"'&&(c)!=L'<'&&(c)!=L'>'&&(c)!=L'|'&&(c)>0x20&&(c)<0x80)
 
 #define	MAKETIME(h,m,s)		((((s)/2)&0x1F)|(((m)&0x3F)<<5)|(((h)&0x1F)<<11))
 #define	MAKEDATE(y,m,d)		((((d)&0x1F))|(((m)&0x0F)<<5)|(((y)&0x7F)<<9))
 
-#define	DIRITEM_LASTLONGNAME	0x40//最后一个长文件名标记位，如果这个长文件名项的“bOrder”逻辑与这个值非零，则表示这是最后一个长文件名项。
-#define	DIRITEM_LONGNAMELEN		0x100//长文件名最大长度
-typedef	struct						//FAT的长文件名目录项结构体
+#define	DIRITEM_LASTLONGNAME	0x40				//最后一个长文件名标记位，如果这个长文件名项的“bOrder”逻辑与这个值非零，则表示这是最后一个长文件名项。
+#define	DIRITEM_LONGNAMELEN		0x100				//长文件名最大长度
+#define	DIRITEM_CHARSPERITEM	(5+6+2)				//长文件名项每项字符数（13？M$怎么想的，这个数字不吉利）
+#define	DIRITEM_MAXSHORTALIAS	1000000				//短文件名最大别名数
+typedef	struct										//FAT的长文件名目录项结构体
 {
-	BYTE	bOrder;					//长文件名顺序
-	WCHAR	wNamePart1[5];			//5个字符的长文件名的一部份
-	BYTE	bAttribute;				//属性，必须为ATTR_LONGNAME
-	BYTE	bType;					//类型，为0则表示这是长文件名的一部份，其他值保留为将来扩展时用。
-	BYTE	bChksum;				//校验和
-	WCHAR	wNamePart2[6];			//6个字符的长文件名的一部份
-	WORD	wFirstClusLO;			//必须为0
-	WCHAR	wNamePart3[2];			//2个字符的长文件名的一部份
+	BYTE	bOrder;									//长文件名顺序
+	WCHAR	wNamePart1[5];							//5个字符的长文件名的一部份
+	BYTE	bAttribute;								//属性，必须为ATTR_LONGNAME
+	BYTE	bType;									//类型，为0则表示这是长文件名的一部份，其他值保留为将来扩展时用。
+	BYTE	bChksum;								//校验和
+	WCHAR	wNamePart2[6];							//6个字符的长文件名的一部份
+	WORD	wFirstClusLO;							//必须为0
+	WCHAR	wNamePart3[2];							//2个字符的长文件名的一部份
 }FAT_LONGNAME;
 
 FAT12IMG_EXTRN	BYTE		g_bDefaultDBR[FLOPPY_BYTES_PER_SEC];				//默认DBR
@@ -104,26 +110,46 @@ FAT12IMG_EXTRN	BYTE		g_bDataArea											//数据区
 	*FLOPPY_BYTES_PER_SEC
 ];
 
-void NewFAT12();	//初始化FAT表
-void NewRoot();		//初始化根目录区
-void NewData();		//初始化数据区
+void NewFAT12(void);								//初始化FAT表
+void NewRoot(void);									//初始化根目录区
+void NewData(void);									//初始化数据区
 
 WORD ReadFAT12Item(WORD wIndex);					//读FAT表
 void WriteFAT12Item(WORD wIndex,WORD wValue);		//写FAT表
 
-WORD FindFreeClus();								//寻找空闲簇
-FAT_DIRITEM* FindFreeRootItem();					//寻找空闲根目录项
+WORD FindFreeClus(void);							//寻找空闲簇
+FAT_DIRITEM* FindFreeRootItem(void);				//寻找空闲根目录项
 FAT_DIRITEM* FindFreeDirItem(WORD wDirClus);		//从子目录寻找空闲目录项
+FAT_DIRITEM* FindShortNameInRoot(char *szShort,char *szExt);//在根目录表查找短文件名
+FAT_DIRITEM* FindLongNameInRoot(WCHAR *wLongName);	//在根目录表查找长文件名
+FAT_DIRITEM* FindShortNameInDir(WORD wDirClus,char *szShort,char *szExt);//在目录表查找短文件名
+FAT_DIRITEM* FindLongNameInDir(WORD wDirClus,WCHAR *wLongName);//在目录表查找长文件名
+FAT_DIRITEM* FindCheckSumOwnerInRoot(BYTE);			//从根目录区找到这个校验和的原文件名
+FAT_DIRITEM* FindCheckSumOwnerInDir(WORD wCluster,BYTE);//从目录找到这个校验和的原文件名
 
-void* GetClusterPtr(WORD wCluster);					//通过簇号取得数据区簇指针
+void*GetClusterPtr(WORD wCluster);					//通过簇号取得数据区簇指针
+WORD GetClusterChainLength(WORD wCluster);			//检查簇链的长度
 
 BYTE ShortNameCheckSum(BYTE *pFileName8_3);			//取得短文件名的校验和
 
+BOOL ValidateName(WCHAR *wLongName);				//检查长文件名是否合法
 BOOL GenShortName(char *szLongName,WCHAR *wLongNameOut,char *szShortOut,char *szExtOut);//生成一个短文件名
-BOOL IsShortNameDupInRoot(char *szShort,char *szExt);//检查在根目录表短文件名是否重复
-BOOL IsShortNameDupInDir(WORD wDirClus,char *szShort,char *szExt);//检查在目录表短文件名是否重复
+void GenShortNameAlias(char *szShort);				//取得另一个短文件名，假设原来的短文件名为XXXXXX~1，此函数将生成XXXXXX~2
 
+BOOL CollectLongNameFromRoot(BYTE,WCHAR *wLongName);//在根目录区从一个校验和找到所有长文件名组分，组成一个长文件名
+BOOL CollectLongNameFromDir(WORD wCluster,BYTE,WCHAR *wLongName);//在目录中从一个校验和找到所有长文件名组分，组成一个长文件名
+
+BOOL IsFreeDirItem(FAT_DIRITEM*);					//判断目录项是否为空闲目录项
+
+FAT_DIRITEM* ParseItem(char *szFile,BYTE bAttr,		//从文件名产生短文件名项、长文件名项
+					   FAT_DIRITEM*(__cdecl*NewItem)(void),
+					   FAT_DIRITEM*(__cdecl*FindLongName)(WCHAR *wLongName),
+					   FAT_DIRITEM*(__cdecl*FindShortName)(char *szShort,char *szExt));
 FAT_DIRITEM* RootCreateItem(char *szFile,BYTE bAttr);//从根目录区创建目录项
 FAT_DIRITEM* DirCreateItem(WORD wDirClus,char *szFile,BYTE bAttr);//从子目录创建目录项
+
+FAT_DIRITEM* MakeDir(WORD wParentClus,char *szName);
+
+#pragma pack(pop)
 
 #endif
