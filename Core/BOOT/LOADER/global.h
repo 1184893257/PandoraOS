@@ -8,10 +8,12 @@
 typedef	unsigned	char	BYTE;
 typedef	unsigned	short	WORD;
 typedef	unsigned	long	DWORD;
+
 typedef	signed		int		INT;
 typedef	signed		char	INT8;
 typedef	signed		short	INT16;
 typedef	signed		long	INT32;
+
 typedef	unsigned	int		UINT;
 typedef	unsigned	char	UINT8;
 typedef	unsigned	short	UINT16;
@@ -26,5 +28,11 @@ typedef	char	bool;
 typedef	INT		BOOL;
 #define	TRUE	1
 #define	FALSE	0
+
+#ifdef	__cplusplus
+#define	NASMEXTRN	extern "C"
+#else
+#define	NASMEXTRN	extern
+#endif
 
 #endif

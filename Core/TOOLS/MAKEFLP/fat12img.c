@@ -663,9 +663,9 @@ FAT_DIRITEM* FindLongNameInDir(WORD wDirClus,WCHAR *wLongName)
 //-----------------------------------------------------------------------------
 BOOL IsFreeDirItem(FAT_DIRITEM* pDir)
 {
-	if(	pDir->szFileName[0]==DIRITEM_FREE||
-		pDir->szFileName[0]==DIRITEM_DELETED||
-		pDir->szFileName[0]==DIRITEM_DELETED_JPN)
+	if(	(BYTE)(pDir->szFileName[0])==DIRITEM_FREE||
+		(BYTE)(pDir->szFileName[0])==DIRITEM_DELETED||
+		(BYTE)(pDir->szFileName[0])==DIRITEM_DELETED_JPN)
 		return TRUE;
 	else
 		return FALSE;
@@ -826,9 +826,9 @@ FAT_DIRITEM* ParseItem(char *szFile,BYTE bAttr,
 }
 
 //-----------------------------------------------------------------------------
-//MakeDir：创建目录
+//MakeDir：创建目录，返回目录占用的簇号
 //-----------------------------------------------------------------------------
-FAT_DIRITEM* MakeDir(WORD wParentClus,char *szName)
+WORD MakeDir(WORD wParentClus,char *szName)
 {
 	WORD wNewClus;
 	FAT_DIRITEM *pItem,*pItemList;
@@ -848,6 +848,8 @@ FAT_DIRITEM* MakeDir(WORD wParentClus,char *szName)
 			pTm=localtime(&(pTime.time));
 			pItemList=(FAT_DIRITEM*)GetClusterPtr(wNewClus);
 			memset(pItemList,0,FLOPPY_BYTES_PER_SEC);
+
+			pItem->wFirstClusLO=wNewClus;
 
 			memcpy(pItemList,DIRITEM_SELF,11);
 			pItemList->bAttribute=ATTR_SUBDIR;
@@ -873,11 +875,11 @@ FAT_DIRITEM* MakeDir(WORD wParentClus,char *szName)
 			pItemList->wWriteDate=pItemList->wCreateDate;
 			pItemList->wFirstClusLO=wParentClus;
 			pItemList->dwFileSize=0;
-			return pItemList-1;
+			return wNewClus;
 		}
 		else
-			return NULL;
+			return 0;
 	}
 	else
-		return NULL;
+		return 0;
 }

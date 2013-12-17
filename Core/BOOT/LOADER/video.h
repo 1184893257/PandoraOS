@@ -3,13 +3,13 @@
 
 #include"global.h"
 
-void	SwitchVideoMode(BYTE);
-void	SwitchToTextMode(void);
-void	SwitchTo320x200(void);
-void	Print(char*);
-void	ShowDec(signed int);
-void	ShowDecU(unsigned int);
-void	ShowHex(signed int);
-void	ShowHexU(unsigned int);
+NASMEXTRN	void	SwitchVideoMode(BYTE);
+NASMEXTRN	void	SwitchToTextMode(void);
+NASMEXTRN	void	SwitchTo320x200(void);
+NASMEXTRN	void	Print(char*);
+NASMEXTRN	void	ShowDec(signed int);
+NASMEXTRN	void	ShowDecU(unsigned int);
+NASMEXTRN	void	ShowHex(signed int);
+NASMEXTRN	void	ShowHexU(unsigned int);
 
 #endif

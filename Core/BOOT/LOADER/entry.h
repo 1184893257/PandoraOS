@@ -10,9 +10,9 @@
 
 #include"global.h"
 
-void	start(void);
+NASMEXTRN	void	start(void);
 
-extern	char	stack[STACKSIZE];
-extern	char	HaltMessage[];
+NASMEXTRN	char	stack[STACKSIZE];
+NASMEXTRN	char	HaltMessage[];
 
 #endif

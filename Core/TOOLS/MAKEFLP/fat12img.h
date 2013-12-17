@@ -148,7 +148,7 @@ FAT_DIRITEM* ParseItem(char *szFile,BYTE bAttr,		//´ÓÎÄ¼şÃû²úÉú¶ÌÎÄ¼şÃûÏî¡¢³¤ÎÄ¼
 FAT_DIRITEM* RootCreateItem(char *szFile,BYTE bAttr);//´Ó¸ùÄ¿Â¼Çø´´½¨Ä¿Â¼Ïî
 FAT_DIRITEM* DirCreateItem(WORD wDirClus,char *szFile,BYTE bAttr);//´Ó×ÓÄ¿Â¼´´½¨Ä¿Â¼Ïî
 
-FAT_DIRITEM* MakeDir(WORD wParentClus,char *szName);
+WORD MakeDir(WORD wParentClus,char *szName);		//´´½¨Ä¿Â¼£¬·µ»ØÄ¿Â¼Õ¼ÓÃµÄ´ØºÅ
 
 #pragma pack(pop)
 

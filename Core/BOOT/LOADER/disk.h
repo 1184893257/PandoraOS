@@ -1,0 +1,16 @@
+#ifndef	_DISK_DRIVER_INCLUDED_
+#define	_DISK_DRIVER_INCLUDED_
+
+#include"global.h"
+
+NASMEXTRN	BOOL	CheckInt13ExAvailable(BYTE bDriver);
+
+NASMEXTRN	INT		CheckDiskType(BYTE bDriver);
+#define	DISKTYPE_NOT_EXIST			0
+#define	DISKTYPE_FDD_NO_CHANGE_LINE	1
+#define	DISKTYPE_FDD				2
+#define	DISKTYPE_HDD				3
+
+NASMEXTRN	void	CHSToLBA_FDD(WORD C,WORD H,WORD S,WORD CMax,WORD HMax,WORD SMax,DWORD* pLBAOut);
+
+#endif

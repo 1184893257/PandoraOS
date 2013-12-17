@@ -11,13 +11,13 @@ global	_bDiskInt13Ex
 
 segment	_TEXT
 
-;bool CheckInt13ExAvailable(void);
+;BOOL CheckInt13ExAvailable(BYTE bDriver);
 proc	_CheckInt13ExAvailable
 	push bx
 	mov byte[_bDiskInt13Ex],0	;INT13扩展功能检测=false
 	mov ah,0x41					;检查INT13扩展功能
 	mov bx,0x55AA
-	mov dl,0x80
+	mov dl,[arg(0)]
 	int 0x13
 	jc .ExChecked
 	cmp bx,0xAA55
@@ -28,7 +28,7 @@ proc	_CheckInt13ExAvailable
 	pop bx
 endproc
 
-;int CheckDiskType(byte bDriver);
+;INT CheckDiskType(BYTE bDriver);
 proc	_CheckDiskType
 	mov ax,0x15ff				;检查磁盘类型
 	mov cx,0xffff
