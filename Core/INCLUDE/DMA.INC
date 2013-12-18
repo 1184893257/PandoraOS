@@ -127,8 +127,8 @@
 %define	DMA_MODE_CHN3			0x03
 
 %define	DMA_MODE_VERIFY			0x00
-%define	DMA_MODE_READ			0x04	;从内存读
-%define	DMA_MODE_WRITE			0x08	;写到内存
+%define	DMA_MODE_WRITE			0x04	;写到内存
+%define	DMA_MODE_READ			0x08	;从内存读
 %define	DMA_MODE_INVALID		0x0C
 
 %define	DMA_MODE_AUTOINIT		0x10
