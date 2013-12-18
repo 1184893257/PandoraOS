@@ -16,7 +16,7 @@ segment	_TEXT			class=CODE
 segment	_DATA			class=DATA
 segment	_BSS			class=BSS
 segment	_STACK	STACK	class=STACK
-group	DGROUP	_DATA _BSS
+group	DGROUP	_DATA _BSS	_STACK
 segment	_TEXT
 
 %ifdef	MODEL_NEAR

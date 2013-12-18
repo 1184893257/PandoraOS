@@ -20,8 +20,7 @@ _start:
 	mov ax,DGROUP		;设置好数据段
 	mov ds,ax
 	mov es,ax
-	mov ax,_STACK		;设置好堆栈
-	mov ss,ax
+	mov ss,ax			;设置好堆栈
 	mov sp,STACKSIZE
 	mov bp,sp
 	call _main			;调用c的main函数
