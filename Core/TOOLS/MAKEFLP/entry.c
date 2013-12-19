@@ -19,23 +19,17 @@ void PrintUsage(void)
 
 int main(int argc,char** argv)
 {
-	FILE *fpout;
+	pErrStream=stderr;
+	NewFAT12();
+	NewRoot();
+	NewData();
+	CreateEmptyDir(CreateEmptyDir(0,"Fuck off!",ATTR_NORMAL)->wFirstClusLO,"Fuck again!",ATTR_NORMAL);
+	WriteFloppy("A.IMG",NULL);
 	if(argc<3)
 	{
 		PrintUsage();
 		return -1;
 	}
-
-	fpout=fopen(argv[1],"wb");
-	if(!fpout)
-	{
-		printf("Could not write data to %s.\n",argv[1]);
-		return -1;
-	}
-	NewFAT12();
-	NewRoot();
-	NewData();
-	fclose(fpout);
 	return 0;
 }
 
