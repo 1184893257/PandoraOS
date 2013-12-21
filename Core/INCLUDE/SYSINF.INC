@@ -10,6 +10,7 @@
 %define	LODR_FILENAME		"LOADER  SYS"	;引导文件名
 %define	CORE_FILENAME		"CORE    SYS"	;內核文件名
 
+%define	MBR_ORG				0x7C00			;主引导扇区起点
 %define	BOOT_ORG			0x7C00			;引导扇区起点
 %define	LODR_ORG			0x7C00			;引导文件起点
 %define	CORE_ORG			0x400000		;內核文件起点

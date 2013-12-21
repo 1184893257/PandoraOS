@@ -1,10 +1,12 @@
 %ifndef	__MBR_INFORMATION_HEADER__
 %define	__MBR_INFORMATION_HEADER__
 
+%define	MBR_CODESIZE	446
+
 ;主引导分区结构
 ;每个分区表的结构都是DiskPartitionTable的结构
 struc MainBootRecord
-	.BootCode	resb	446	;引导指令
+	.BootCode	resb	MBR_CODESIZE;引导指令
 	.DPT1		resb	16	;主分区表1
 	.DPT2		resb	16	;主分区表2
 	.DPT3		resb	16	;主分区表3
