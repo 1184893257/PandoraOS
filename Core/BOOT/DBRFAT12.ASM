@@ -7,15 +7,17 @@ bits 16
 Start:
 
 ;先把本体从0:BOOT_ORG转移至0:DBR_NEWPOS
+cli
 xor ax,ax						;对齐各个段
 mov es,ax
 mov ss,ax
 mov ds,ax
-mov si,BOOT_ORG					;源：引导开始
-mov sp,si						;同时设置好堆栈
-mov di,DBR_NEWPOS				;目标：DBR的新家
-mov cx,DBR_SIZE					;字节数：DBR的尺寸
-rep movsb						;转移到目标
+mov sp,BOOT_ORG					;设置好堆栈
+mov si,BOOT_ORG					;准备把本体转移到低位内存运行
+mov di,DBR_NEWPOS
+mov cx,DBR_SIZE>>1
+rep movsw						;通过减少拷贝的次数来提高拷贝的速度
+sti
 jmp 0x0000:DBR_Continue
 
 DBR_Continue:					;此处从DBR_Continue开始
