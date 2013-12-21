@@ -51,6 +51,7 @@ FoundActivePartition:
 ;dl=驱动器
 
 CheckINT13EX:
+push ax							;存住分区号
 mov ah,0x41
 mov bx,0x55AA
 int 0x13						;检查是否支持扩展引导功能
@@ -58,18 +59,49 @@ jc NoINT13EX
 cmp bx,0xAA55
 jnz NoINT13EX
 
-
-
-
-
+pop bx							;取回分区号
+shl bx,4						;×16，加上分区表的起始就能访问到分区表的结构体
+mov eax,[DPT+bx+DiskPartitionTable.dwLBAStart];取得该分区的起始LBA
+mov [DAP.LBA],eax				;准备读取
+mov ah,0x42
+mov si,DAP
+int 0x13						;读取
+jc ReadErr
+jmp 0x0000:BOOT_ORG				;跳转至DBR继续运行
 
 NoINT13EX:
+pop bx							;取回分区号
+shl bx,4						;×16，加上分区表的起始就能访问到分区表的结构体
+mov ax,0x0201					;功能2，CHS读磁盘，读取1个扇区
+mov dh,[DPT+bx+DiskPartitionTable.StartCHS+0];磁头
+mov cx,[DPT+bx+DiskPartitionTable.StartCHS+1];扇区，柱面
+mov bx,BOOT_ORG
+int 0x13
+jc ReadErr
+jmp 0x0000:BOOT_ORG				;跳转至DBR继续运行
 
+ReadErr:
+mov si,ReadDiskErrPrompt
+call PrintText
+xor ax,ax
+int 0x16
+int 0x18						;调用INT 0x18让BIOS解决这个问题。
 
 %include"PrintText.inc"
 
 NoActivePartPrompt:
 	db	"There is no active partition in this hard disk. Only active partition is bootable.",0xD,0xA,0
+
+ReadDiskErrPrompt:
+	db	"Unable to read hard disk.",0xD,0xA,0
+
+DAP:
+.StructureSize	db	0x10
+				db	0x00
+.NumBlocks		dw	0x0001
+.TransferBuffer	dd	BOOT_ORG
+.LBA			dq	0
+
 
 times MBR_CODESIZE-($-$$) db 0	;填充字节
 DPT:							;磁盘分区表
