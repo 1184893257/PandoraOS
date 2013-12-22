@@ -30,4 +30,10 @@ typedef	INT		BOOL;
 
 typedef	WORD WCHAR;
 
+#ifdef	__cplusplus
+#define	NASMEXTRN	extern "C"
+#else
+#define	NASMEXTRN	extern
+#endif
+
 #endif

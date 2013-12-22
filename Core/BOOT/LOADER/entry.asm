@@ -17,12 +17,14 @@ extern	_main			;c程序的main入口点void main(void)
 segment	_TEXT			;代码段
 resb 0x7C00				;代码段的开始位置，段内偏移在0x7C00处
 _start:
+	cli
 	mov ax,DGROUP		;设置好数据段
 	mov ds,ax
 	mov es,ax
 	mov ss,ax			;设置好堆栈
 	mov sp,STACKSIZE
 	mov bp,sp
+	sti
 	call _main			;调用c的main函数
 
 	cli					;这里应该当机，不处理中断
