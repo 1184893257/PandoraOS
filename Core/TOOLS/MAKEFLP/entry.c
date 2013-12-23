@@ -7,6 +7,7 @@
 //*****************************************************************************
 #include<stdio.h>
 #include<string.h>
+#include<locale.h>
 #include"fat12img.h"
 
 void PrintUsage(void)
@@ -19,17 +20,14 @@ void PrintUsage(void)
 
 int main(int argc,char** argv)
 {
-	pErrStream=stderr;
-	NewFAT12();
-	NewRoot();
-	NewData();
-	CreateEmptyDir(CreateEmptyDir(0,"Fuck off!",ATTR_NORMAL)->wFirstClusLO,"Fuck again!",ATTR_NORMAL);
-	WriteFloppy("A.IMG",NULL);
+	setlocale(LC_ALL,"");
 	if(argc<3)
 	{
 		PrintUsage();
 		return -1;
 	}
+	pErrStream=stderr;
+	NewFloppy();
 	return 0;
 }
 

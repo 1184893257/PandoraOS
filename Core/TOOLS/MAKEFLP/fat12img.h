@@ -4,12 +4,15 @@
 #ifndef	FAT12IMG_EXTRN
 #ifdef	__cplusplus
 #define	FAT12IMG_EXTRN	extern "C"
+#define	FAT12IMG_INLINE	inline
 #else
 #define	FAT12IMG_EXTRN	extern
+#define	FAT12IMG_INLINE	_inline
 #endif
 #endif
 
 #include<stdio.h>
+#include<memory.h>
 
 typedef	unsigned char	BYTE;
 typedef	unsigned short	WORD;
@@ -42,7 +45,6 @@ typedef	int		BOOL;
 #define	FLOPPY_CLUS_MAX			0xFEF
 #define	FLOPPY_CLUS_MIN			2
 #define	FLOPPY_CLUS_END			0xFFF
-#define	FLOPPY_VALID_CLUS(c)	((c)>=FLOPPY_CLUS_MIN&&(c)<=FLOPPY_CLUS_MAX)
 #define	MEDIA_FDD				0xF0
 
 //文件目录项的值
@@ -80,13 +82,14 @@ typedef	struct				//FAT目录项结构体
 }FAT_DIRITEM;
 
 //不合法的文件名字符：\ / * ? " < > |
-#define	VALIDCHR(c)			((c)!= '\\'&&(c)!= '/'&&(c)!= '*'&&(c)!= '?'&&(c)!= '\"'&&(c)!= '<'&&(c)!= '>'&&(c)!= '|'&&(c)>0x20&&(c)<0x80)
-#define	VALIDWCHR(c)		((c)!=L'\\'&&(c)!=L'/'&&(c)!=L'*'&&(c)!=L'?'&&(c)!=L'\"'&&(c)!=L'<'&&(c)!=L'>'&&(c)!=L'|'&&(c)>0x20&&(c)<0x80)
+#define	VALIDCHR(c)			((c)!= '\\'&&(c)!= '/'&&(c)!= '*'&&(c)!= '?'&&(c)!= '\"'&&(c)!= '<'&&(c)!= '>'&&(c)!= '|')
+#define	VALIDWCHR(c)		((c)!=L'\\'&&(c)!=L'/'&&(c)!=L'*'&&(c)!=L'?'&&(c)!=L'\"'&&(c)!=L'<'&&(c)!=L'>'&&(c)!=L'|')
 
 #define	MAKETIME(h,m,s)		((((s)/2)&0x1F)|(((m)&0x3F)<<5)|(((h)&0x1F)<<11))
 #define	MAKEDATE(y,m,d)		((((d)&0x1F))|(((m)&0x0F)<<5)|(((y)&0x7F)<<9))
 
 #define	DIRITEM_LASTLONGNAME	0x40				//最后一个长文件名标记位，如果这个长文件名项的“bOrder”逻辑与这个值非零，则表示这是最后一个长文件名项。
+#define	DIRITEM_LNORDERMASK		0x3F				//长文件名序号的屏蔽位
 #define	DIRITEM_LONGNAMELEN		0x100				//长文件名最大长度
 #define	DIRITEM_CHARSPERITEM	(5+6+2)				//长文件名项每项字符数（13？M$怎么想的，这个数字不吉利）
 #define	DIRITEM_MAXSHORTALIAS	1000000				//短文件名最大别名数
@@ -101,13 +104,18 @@ typedef	struct										//FAT的长文件名目录项结构体
 	WORD	wFirstClusLO;							//必须为0
 	WCHAR	wNamePart3[2];							//2个字符的长文件名的一部份
 }FAT_LONGNAME;
+#define	DIRITEMS_PER_CLUS	(FLOPPY_BYTES_PER_CLUS/sizeof(FAT_DIRITEM))
 
-FAT12IMG_EXTRN	FILE		*pErrStream;										//输出错误的文件流
+//#############################################################################
+//                                 变量声明
+//#############################################################################
 
-FAT12IMG_EXTRN	BYTE		g_bDefaultDBR[FLOPPY_BYTES_PER_SEC];				//默认DBR
-FAT12IMG_EXTRN	BYTE		g_bFAT12[FLOPPY_SECS_PER_FAT*FLOPPY_BYTES_PER_SEC];	//FAT表
-FAT12IMG_EXTRN	FAT_DIRITEM	g_RootDirs[FLOPPY_MAX_ROOT];						//根目录区
-FAT12IMG_EXTRN	BYTE		g_bDataArea											//数据区
+FAT12IMG_EXTRN	FILE			*pErrStream;										//输出错误的文件流
+
+FAT12IMG_EXTRN	const	BYTE	g_bDefaultDBR[FLOPPY_BYTES_PER_SEC];				//默认DBR
+FAT12IMG_EXTRN	BYTE			g_bFAT12[FLOPPY_SECS_PER_FAT*FLOPPY_BYTES_PER_SEC];	//FAT表
+FAT12IMG_EXTRN	FAT_DIRITEM		g_RootDirs[FLOPPY_MAX_ROOT];						//根目录区
+FAT12IMG_EXTRN	BYTE			g_bDataArea											//数据区
 [
 	FLOPPY_SIZE-
 	(FLOPPY_DBR_SECS+
@@ -116,15 +124,26 @@ FAT12IMG_EXTRN	BYTE		g_bDataArea											//数据区
 	*FLOPPY_BYTES_PER_SEC
 ];
 
-FAT12IMG_EXTRN	void NewFAT12(void);												//初始化FAT表
-FAT12IMG_EXTRN	void NewRoot(void);													//初始化根目录区
-FAT12IMG_EXTRN	void NewData(void);													//初始化数据区
+//#############################################################################
+//                                 函数声明
+//#############################################################################
+
+FAT12IMG_INLINE	void NewFAT12(void);												//初始化FAT表
+FAT12IMG_INLINE	void NewRoot(void);													//初始化根目录区
+FAT12IMG_INLINE	void NewData(void);													//初始化数据区
+FAT12IMG_INLINE	void NewFloppy(void);												//全部初始化
+FAT12IMG_INLINE	BOOL IsValidCluster(WORD wCluster);									//判断簇号是否合法
 
 FAT12IMG_EXTRN	WORD ReadFAT12Item(WORD wIndex);									//读FAT表
 FAT12IMG_EXTRN	void WriteFAT12Item(WORD wIndex,WORD wValue);						//写FAT表
 
-FAT12IMG_EXTRN	WORD FindFreeClus(void);											//寻找空闲簇
-FAT12IMG_EXTRN	WORD AllocateNewCluster(WORD wParentCluster);						//给簇链分配新的簇
+FAT12IMG_EXTRN	BYTE ShortNameCheckSum(BYTE *pFileName8_3);							//取得短文件名的校验和
+FAT12IMG_EXTRN	BOOL ValidateName(WCHAR *wLongName);								//检查长文件名是否合法
+FAT12IMG_EXTRN	BOOL GenShortName(char *szLongName,WCHAR *wLongNameOut,char *szShortOut,char *szExtOut);//生成一个短文件名
+FAT12IMG_EXTRN	void GenShortNameAlias(char *szShort);								//取得另一个短文件名，假设原来的短文件名为XXXXXX~1，此函数将生成XXXXXX~2
+
+FAT12IMG_EXTRN	BOOL CollectLongNameFromRoot(FAT_DIRITEM*,WCHAR *wLongName);		//在根目录区从一个校验和找到所有长文件名组分，组成一个长文件名
+FAT12IMG_EXTRN	BOOL CollectLongNameFromDir(WORD wCurrentCluster,FAT_DIRITEM *pShortName,WCHAR *wLongName);//在目录中从一个校验和找到所有长文件名组分，组成一个长文件名
 
 FAT12IMG_EXTRN	FAT_DIRITEM* FindFreeRootItem(void);								//寻找空闲根目录项
 FAT12IMG_EXTRN	FAT_DIRITEM* FindFreeDirItem(WORD wDirClus);						//从子目录寻找空闲目录项
@@ -135,40 +154,81 @@ FAT12IMG_EXTRN	FAT_DIRITEM* FindLongNameInDir(WORD wDirClus,WCHAR *wLongName);		
 FAT12IMG_EXTRN	FAT_DIRITEM* FindShortNameInRootByCheckSum(BYTE);					//从根目录区找到这个校验和的原文件名
 FAT12IMG_EXTRN	FAT_DIRITEM* FindShortNameInDirByCheckSum(WORD wCluster,BYTE);		//从目录找到这个校验和的原文件名
 
+FAT12IMG_EXTRN	WORD FindFreeClus(void);											//寻找空闲簇
+FAT12IMG_EXTRN	WORD AllocateNewCluster(WORD wParentCluster);						//给簇链分配新的簇
+FAT12IMG_EXTRN	WORD AppendNewClusterToChain(WORD wCluster);						//给簇链尾追加一个新的簇
+
 FAT12IMG_EXTRN	void*GetClusterPtr(WORD wCluster);									//通过簇号取得数据区簇指针
+FAT12IMG_EXTRN	WORD GetPrevCluster(WORD wCluster);									//取得指向这个簇的前一个簇号
+FAT12IMG_EXTRN	WORD GetNbFreeClusters(void);										//统计空闲簇数
 FAT12IMG_EXTRN	WORD GetClusterChainLength(WORD wCluster);							//检查簇链的长度
-
-FAT12IMG_EXTRN	BYTE ShortNameCheckSum(BYTE *pFileName8_3);							//取得短文件名的校验和
-
-FAT12IMG_EXTRN	BOOL ValidateName(WCHAR *wLongName);								//检查长文件名是否合法
-FAT12IMG_EXTRN	BOOL GenShortName(char *szLongName,WCHAR *wLongNameOut,char *szShortOut,char *szExtOut);//生成一个短文件名
-FAT12IMG_EXTRN	void GenShortNameAlias(char *szShort);								//取得另一个短文件名，假设原来的短文件名为XXXXXX~1，此函数将生成XXXXXX~2
-
-FAT12IMG_EXTRN	BOOL CollectLongNameFromRoot(BYTE,WCHAR *wLongName);				//在根目录区从一个校验和找到所有长文件名组分，组成一个长文件名
-FAT12IMG_EXTRN	BOOL CollectLongNameFromDir(WORD wCluster,BYTE,WCHAR *wLongName);	//在目录中从一个校验和找到所有长文件名组分，组成一个长文件名
+FAT12IMG_EXTRN	WORD GetClusterChainLastCluster(WORD wFirstCluster);				//取得簇链最后一个簇的簇号
 
 FAT12IMG_EXTRN	BOOL IsFreeDirItem(FAT_DIRITEM*);									//判断目录项是否为空闲目录项
-
-FAT12IMG_EXTRN	FAT_DIRITEM* ParseItem(	char *szFile,BYTE bAttr,					//从文件名产生短文件名项、长文件名项
-										FAT_DIRITEM*(__cdecl*NewItem)(void),							//创建目录项的子程序
-										FAT_DIRITEM*(__cdecl*FindLongName)(WCHAR *wLongName),			//查找长文件名的子程序
-										FAT_DIRITEM*(__cdecl*FindShortName)(char *szShort,char *szExt));//查找短文件名的子程序
+FAT12IMG_EXTRN	BOOL IsShortName(WCHAR*);											//判断文件名是否为短文件名
+FAT12IMG_EXTRN	void CopyLongNameToItem(FAT_LONGNAME *pItem,WCHAR *wLongName);		//拷贝长文件名的一部分到一个长文件名目录项
 FAT12IMG_EXTRN	FAT_DIRITEM* RootCreateItem(char *szFile,BYTE bAttr);				//从根目录区创建目录项
 FAT12IMG_EXTRN	FAT_DIRITEM* DirCreateItem(WORD wDirClus,char *szFile,BYTE bAttr);	//从子目录创建目录项
+FAT12IMG_EXTRN	DWORD WriteDataToEOF(FAT_DIRITEM* pFileItem,void *pData,DWORD dwDataSize);//写数据到文件尾，返回实际写入的字节数。
 
 FAT12IMG_EXTRN	FAT_DIRITEM* CreateEmptyDir(WORD wParentClus,char *szName,BYTE bAttribute);	//创建空目录，返回目录在父目录的项
 FAT12IMG_EXTRN	FAT_DIRITEM* CreateEmptyFile(WORD wParentClus,char *szName,BYTE bAttribute);//创建空文件，返回文件在父目录的项
-FAT12IMG_EXTRN	DWORD WriteDataToEOF(FAT_DIRITEM* pFileItem,void *pData,DWORD dwDataSize);	//写数据到文件尾，返回实际写入的字节数。
-
 FAT12IMG_EXTRN	void SetCreateTime		(FAT_DIRITEM *pItem,struct _timeb *pTime);	//设置目录项的创建时间
 FAT12IMG_EXTRN	void SetLastAccessDate	(FAT_DIRITEM *pItem,struct _timeb *pTime);	//设置目录项的最后访问日期
 FAT12IMG_EXTRN	void SetLastWriteTime	(FAT_DIRITEM *pItem,struct _timeb *pTime);	//设置目录项的最后写的时间
 
-FAT12IMG_EXTRN	WORD GetNbFreeClusters(void);										//统计空闲簇数
+FAT12IMG_EXTRN	BOOL WriteFloppy(char *szFile,char *szDBRFile);						//保存镜像到文件或磁盘
 
-FAT12IMG_EXTRN	BOOL WriteFloppy(char *szFile,char *szDBRFile);						//保存镜像到文件
+//#############################################################################
+//                              内联函数实现
+//#############################################################################
+
+//-----------------------------------------------------------------------------
+//NewFAT12：初始化FAT12的FAT表
+//-----------------------------------------------------------------------------
+void NewFAT12(void)
+{
+	memset(g_bFAT12,0,sizeof(g_bFAT12));
+	WriteFAT12Item(0,MEDIA_FDD|0xF00);
+	WriteFAT12Item(1,0xFFF);
+}
+
+//-----------------------------------------------------------------------------
+//NewRoot：初始化FAT12的根目录表
+//-----------------------------------------------------------------------------
+void NewRoot(void)
+{
+	memset(g_RootDirs,0,sizeof(g_RootDirs));
+}
+
+//-----------------------------------------------------------------------------
+//NewData：初始化FAT12的数据区（也就是全部清空）
+//-----------------------------------------------------------------------------
+void NewData(void)
+{
+	memset(g_bDataArea,0,sizeof(g_bDataArea));
+}
+
+//-----------------------------------------------------------------------------
+//NewFloppy：全部初始化
+//-----------------------------------------------------------------------------
+void NewFloppy(void)
+{
+	NewFAT12();
+	NewRoot();
+	NewData();
+}
+
+//-----------------------------------------------------------------------------
+//IsValidCluster：判断簇号是否为合法簇
+//-----------------------------------------------------------------------------
+BOOL IsValidCluster(WORD wCluster)
+{
+	return
+		wCluster>=FLOPPY_CLUS_MIN &&
+		wCluster<=FLOPPY_CLUS_MAX;
+}
 
 
 #pragma pack(pop)
-
 #endif
