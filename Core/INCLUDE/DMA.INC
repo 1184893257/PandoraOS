@@ -118,6 +118,10 @@
 %define	DMA_MASK_CHN1			0x01
 %define	DMA_MASK_CHN2			0x02
 %define	DMA_MASK_CHN3			0x03
+%define	DMA2_MASK_CHN4			0x00
+%define	DMA2_MASK_CHN5			0x01
+%define	DMA2_MASK_CHN6			0x02
+%define	DMA2_MASK_CHN7			0x03
 
 %define	DMA_MASK_SET			0x04
 
@@ -125,6 +129,10 @@
 %define	DMA_MODE_CHN1			0x01
 %define	DMA_MODE_CHN2			0x02
 %define	DMA_MODE_CHN3			0x03
+%define	DMA2_MODE_CHN4			0x00
+%define	DMA2_MODE_CHN5			0x01
+%define	DMA2_MODE_CHN6			0x02
+%define	DMA2_MODE_CHN7			0x03
 
 %define	DMA_MODE_VERIFY			0x00
 %define	DMA_MODE_WRITE			0x04	;Ð´µ½ÄÚ´æ
