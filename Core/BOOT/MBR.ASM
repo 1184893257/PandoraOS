@@ -22,19 +22,19 @@ jmp 0x0000:MBR_Continue
 MBR_Continue:
 mov ax,0
 mov dl,[DPT.1]
-cmp dl,0x80
+cmp dl,DPT_ACTIVE
 jae FoundActivePartition
 inc ax
 mov dl,[DPT.2]
-cmp dl,0x80
+cmp dl,DPT_ACTIVE
 jae FoundActivePartition
 inc ax
 mov dl,[DPT.3]
-cmp dl,0x80
+cmp dl,DPT_ACTIVE
 jae FoundActivePartition
 inc ax
 mov dl,[DPT.4]
-cmp dl,0x80
+cmp dl,DPT_ACTIVE
 jae FoundActivePartition
 
 mov si,NoActivePartPrompt
@@ -61,7 +61,7 @@ jnz NoINT13EX
 
 pop bx							;取回分区号
 shl bx,4						;×16，加上分区表的起始就能访问到分区表的结构体
-mov eax,[DPT+bx+DiskPartitionTable.dwLBAStart];取得该分区的起始LBA
+mov eax,[DPT+bx+DPTITEM.dwLBAStart];取得该分区的起始LBA
 mov [DAP.LBA],eax				;准备读取
 mov ah,0x42
 mov si,DAP
@@ -73,8 +73,8 @@ NoINT13EX:
 pop bx							;取回分区号
 shl bx,4						;×16，加上分区表的起始就能访问到分区表的结构体
 mov ax,0x0201					;功能2，CHS读磁盘，读取1个扇区
-mov dh,[DPT+bx+DiskPartitionTable.StartCHS+0];磁头
-mov cx,[DPT+bx+DiskPartitionTable.StartCHS+1];扇区，柱面
+mov dh,[DPT+bx+DPTITEM.StartCHS+0];磁头
+mov cx,[DPT+bx+DPTITEM.StartCHS+1];扇区，柱面
 mov bx,BOOT_ORG
 int 0x13
 jc ReadErr

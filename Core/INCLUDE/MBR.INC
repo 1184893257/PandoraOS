@@ -15,8 +15,8 @@ struc MainBootRecord
 endstruc
 
 ;分区表结构
-struc DiskPartitionTable
-	.bDriverID	resb	1	;是否为活动分区，值小于MBR_ACTIVE为非活动分区
+struc DPTITEM
+	.bDriverID	resb	1	;是否为活动分区，值小于DPT_ACTIVE为非活动分区
 	.StartCHS	resb	3	;分区起始位置CHS
 	.bFSType	resb	1	;文件系统类型
 	.EndCHS		resb	3	;分区结束位置CHS
@@ -25,8 +25,8 @@ struc DiskPartitionTable
 endstruc
 
 ;文件系统类型支持的值
-%define	MBR_ACTIVE						0x80	;活動分區驅動器號開始
-%define	MBR_INACTIVE					0x00	;非活動分區
+%define	DPT_ACTIVE						0x80	;活动分区驱动器号开始
+%define	DPT_INACTIVE					0x00	;非活动分区
 
 %define	FS_INVALID						0x00
 %define	FS_FAT32						0x01
