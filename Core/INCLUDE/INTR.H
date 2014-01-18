@@ -1,0 +1,27 @@
+#ifndef	_PROGRAMMABLE_INTERRUPT_CHIP_
+#define	_PROGRAMMABLE_INTERRUPT_CHIP_
+
+#include"CCOMMON.H"
+
+#define	PIC_MASK		0x21
+#define	PIC_MODE		0x20
+#define	PIC2_MASK		0xA1
+#define	PIC2_MODE		0xA0
+
+#define	PIC_EOI			0x20
+#define	PIC_SPECEOI		0x60
+
+#define	PIC_IRQ0_7BEGIN	0x08
+#define	PIC_IRQ8_FBEGIN	0x70
+
+#define	PIC_IRQ(x)		((x>7)?PIC_IRQ8_FBEGIN+(x):PIC_IRQ0_7BEGIN+(x))
+
+NASMFUNC	DWORD	GetVector(BYTE);
+NASMFUNC	void	SetVector(BYTE,DWORD);
+NASMFUNC	void	SendEOI(BYTE);
+NASMFUNC	void	SetMask(BYTE);
+NASMFUNC	BYTE	GetMask(BYTE);
+NASMFUNC	void	ClearMask(BYTE);
+
+#endif
+

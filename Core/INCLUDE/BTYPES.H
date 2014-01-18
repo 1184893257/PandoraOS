@@ -30,10 +30,21 @@ typedef	INT		BOOL;
 
 typedef	WORD WCHAR;
 
-#ifdef	__cplusplus
-#define	NASMEXTRN	extern "C"
+#ifdef __cplusplus
+#define	NASMFUNC extern"C"
+#define	NASMSYM extern"C"
 #else
-#define	NASMEXTRN	extern
+#define	NASMFUNC extern
+#define	NASMSYM extern
 #endif
+
+#define	MAKEWORD(l,h)	((WORD)l|((WORD)h<<8))
+#define	MAKEDWORD(l,h)	((DWORD)l|((DWORD)h<<16))
+
+#define	LOBYTE(w)		((w & 0x00FF)>>0)
+#define	HIBYTE(w)		((w & 0xFF00)>>8)
+
+#define	LOWORD(dw)		((dw & 0x0000FFFF)>>0)
+#define	HIWORD(dw)		((dw & 0xFFFF0000)>>16)
 
 #endif
