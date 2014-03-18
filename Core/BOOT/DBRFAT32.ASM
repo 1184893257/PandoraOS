@@ -1,11 +1,12 @@
 %include "SYSINF.INC"
 
-org DBR_NEWPOS
+org BOOT_ORG
 bits 16
 
 CPU 586	;¾¡Á¿±£Ö¤¼æÈİĞÔ
 
 %include "BPBFAT32.INC"
+<<<<<<< HEAD
 
 %define FATBuffer	(DBR_NEWPOS + 1024)	;FAT»º³åÇøµØÖ·, »º´æÒ»¸öÉÈÇø(Ç°1024×Ö½ÚÓÃÓÚ: µÚÒ»¸ö512×Ö½ÚÊÇDBR, ºó512×Ö½ÚÊÇBSSÊı¾İºÍÕ»)
 %define rootEntries	2000h				;¸ùÄ¿Â¼»º³åÇøµØÖ·, »º´æÒ»¸ö´Ø(ÉÈÇø´óĞ¡Ğ¡ÓÚ5KµÄ¾Í²»»á¸²¸ÇFATBuffer)
@@ -23,7 +24,11 @@ struc PARAMS							;²ÎÊı±í
 	.DAPLBA			resq	1			;Êı¾İ°üÖ¸¶¨µÄ¿éµØÖ·
 endstruc
 
+=======
+>>>>>>> parent of c65bc61... å¼•å¯¼FAT32åˆ†åŒºä¸Šçš„DBRå®Œæˆäº†, å¯åœ¨å®ä½“æœºä¸­ä½¿ç”¨
 Start:
+
+%define	MOVER_SIZE		(DBR_Continue-$$)
 
 ;ÏÈ°Ñ±¾Ìå´Ó0:BOOT_ORG×ªÒÆÖÁ0:DBR_NEWPOS
 cli
@@ -31,7 +36,7 @@ xor ax,ax						;¶ÔÆë¸÷¸ö¶Î
 mov es,ax
 mov ss,ax
 mov ds,ax
-mov sp,FATBuffer				;ÉèÖÃºÃ¶ÑÕ»
+mov sp,BOOT_ORG					;ÉèÖÃºÃ¶ÑÕ»
 mov si,BOOT_ORG					;×¼±¸°Ñ±¾Ìå×ªÒÆµ½µÍÎ»ÄÚ´æÔËĞĞ
 mov di,DBR_NEWPOS
 mov cx,DBR_SIZE>>1
@@ -40,6 +45,7 @@ sti
 jmp 0x0000:DBR_Continue
 
 DBR_Continue:					;´Ë´¦´ÓDBR_Continue¿ªÊ¼
+<<<<<<< HEAD
 mov ah,0x41
 mov bx,
 
@@ -68,3 +74,8 @@ SecContinue:
 
 times DBR_SIZE-($-SecContinue)-2	db 0
 dw	FLAG_BOOTALBE
+=======
+
+times DBR_SIZE-($-$$)-2	nop
+dw	FLAG_BOOTALBE
+>>>>>>> parent of c65bc61... å¼•å¯¼FAT32åˆ†åŒºä¸Šçš„DBRå®Œæˆäº†, å¯åœ¨å®ä½“æœºä¸­ä½¿ç”¨
